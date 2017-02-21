@@ -1,0 +1,12 @@
+helm install alertmanager  --name alertmanager  fails with the following :
+
+
+Error: render error in "alertmanager/templates/alertmanager-config.yaml": template: alertmanager/templates/alertmanager-config.yaml:102:82: executing "alertmanager/templates/alertmanager-config.yaml" at <.GroupLabels.alertna...>: can't evaluate field alertname in type interface {}
+
+NOTE:
+
+helm is bitching about this line in the config file :
+
+RunBook: 'https://confluence.aws.axsy.com/display/OP/{{ .GroupLabels.alertname }}'
+
+
