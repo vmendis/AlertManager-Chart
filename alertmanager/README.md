@@ -5,8 +5,9 @@ A. Requirement to integrate with Monitoring Services
 
 
 B. General Notes
+
     a. Prometheus must be deployed before Alertmanager
-    b.  Premetheus reads alerts from ./ops/k8s/services/monitoring/charts/prometheus/resources/rules/alert.rules
+    b. Prometheus reads alerts from ./ops/k8s/services/monitoring/charts/prometheus/resources/rules/alert.rules
     c. Following file links the alert.rules to promethus. See under 'alert.rules:'
         ./ops/k8s/services/monitoring/charts/prometheus/templates/prometheus-configmap.yml
 
