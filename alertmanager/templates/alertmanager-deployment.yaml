@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: services
+  name: alertmanager
+
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+        version: "v0.5.1"
+    spec:
+      containers:
+      - name: alert-manager
+        image: quay.io/prometheus/alertmanager:v0.5.1
+
+        ports:
+        - name: web
+          containerPort: 9093
+        args:
+          - -config.file=/etc/axsy-alertmanager/alertmanager.yml
+
+        volumeMounts:
+        - name: config-volume-alertmanager
+          mountPath: /etc/axsy-alertmanager
+
+        - name: config-volume-prometheus
+          mountPath: /etc/prometheus
+
+
+      # Volumes and config maps
+      volumes:
+        - name: config-volume-alertmanager
+          configMap:
+            name: alertmanager-config
+
+      # This config map comes from the prometheus deployment.
+      # Make sure prometheus has been deployed before alertmanager deployment
+        - name: config-volume-prometheus
+          configMap:
+            name: prometheus
+
+

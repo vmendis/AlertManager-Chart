@@ -1,0 +1,135 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: services
+data:
+  alertmanager.yml: |-
+
+    global:
+      smtp_smarthost: 'mail.aws.axsy.com:25'
+      smtp_from: 'alertmanager@axsy.com'
+
+      # Define our slack api URL here
+      slack_api_url: 'https://hooks.slack.com/services/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'
+
+
+    # The directory from which notification templates are read.
+    # Populate notifications templates later on
+    templates: 
+    - '/etc/alertmanager/template/*.tmpl'
+
+    # The root route on which each incoming alert enters.
+    route:
+      # The labels by which incoming alerts are grouped together. For example,
+      # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+      # be batched into a single group.
+      group_by: ['alertname', 'cluster', 'service']
+      
+      group_wait: 30s
+      group_interval: 1m
+      
+
+      # If an alert has successfully been sent, wait 'repeat_interval' to
+      # resend them.
+      repeat_interval: 10m
+      
+      
+      # A default receiver
+      receiver: ops-email
+
+
+      # All the above attributes are inherited by all child routes and can 
+      # overwritten on each.
+
+      routes:
+      - match_re:
+          service_name: ^(test_service)$
+        receiver: ops-email
+
+      routes:
+      - match_re:
+          service_name: ^(node_exporter_service)$
+        receiver: ops-email-slack
+
+      routes:
+      - match:
+          severity: warning
+        receiver: ops-email
+
+      - match:
+          severity: critical
+        # receiver: ops-email-slack
+        receiver: alerta
+
+
+
+
+
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'cluster', 'service']
+
+    
+    #  RECEIVERS are defined here ####    
+
+    receivers:
+
+    # Begin ops-email
+    - name: 'ops-email'
+      email_configs:
+      - to: 'virantha.mendis@axsy.com'
+        require_tls: false
+        send_resolved: true
+    
+    # End ops-email
+
+
+    # Begin ops-slack 
+    - name: 'ops-slack'
+      slack_configs:
+      - send_resolved: true
+        username: 'Alertmanager@axsy.com'
+        channel: '#virantha-k8s-tests'
+        text: >-
+              Summary: '{{ range .Alerts }}{{ .Annotations.summary }} {{ end }}'
+
+              Description: '{{ range .Alerts }}{{ .Annotations.description }} {{ end }}'
+
+              RunBook: 'https://confluence.aws.axsy.com/display/OP/{{ .GroupLabels.alertname }}'
+
+    # End ops-slack 
+
+
+    # Begin ops-email-slack 
+    - name: 'ops-email-slack'
+      email_configs:
+      - to: 'virantha.mendis@axsy.com'
+        require_tls: false
+        send_resolved: true
+
+      slack_configs:
+      - send_resolved: true
+        username: 'Alertmanager@axsy.com'
+        channel: '#virantha-k8s-tests'
+        text: >-
+              Summary: '{{ range .Alerts }}{{ .Annotations.summary }} {{ end }}'
+
+              Description: '{{ range .Alerts }}{{ .Annotations.description }} {{ end }}'
+
+              RunBook: 'https://confluence.aws.axsy.com/display/OP/{{ .GroupLabels.alertname }}'
+
+    # End ops-email-slack 
+
+
+    # Begin alerta
+    - name: "alerta"
+      webhook_configs:
+      - url: 'http://10.1.12.56:8181/api/webhooks/prometheus'
+      # - url: 'http://100.64.37.4:8181/api/webhooks/prometheus'
+        send_resolved: true
+
+    # End alerta
