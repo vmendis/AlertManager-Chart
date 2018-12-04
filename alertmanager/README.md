@@ -1,6 +1,6 @@
 A. Requirement to integrate with Monitoring Services
 
-    a. alertmanager.aws.axsy.com      - in Route53
+    a. alertmanager.aws.<your-company>.com      - in Route53
     b. An Ingress point 
 
 
