@@ -11,7 +11,7 @@ B. General Notes
     c. Following file links the alert.rules to promethus. See under 'alert.rules:'
         ./ops/k8s/services/monitoring/charts/prometheus/templates/prometheus-configmap.yml
 
-    d. Emails are sent via mail.aws.axsy.com
+    d. Emails are sent via mail.aws.<your-company>.com
     e. Slack alerts are sent out to my personnel channel. This requires changing according to the wishes
     of the operations team.
 
